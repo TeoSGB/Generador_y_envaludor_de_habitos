@@ -3,6 +3,7 @@ from pathlib import Path
 from app.exceptions import SimulatedInternalError
 from app.models.progress import EvaluateProgressRequest, EvaluateProgressResponse
 from app.services.context_analysis_service import GoalContext, analyze_goal
+from app.services.history_repository import HistoryRepository
 from app.views.progress_view import build_progress_response
 
 
@@ -13,6 +14,7 @@ class ProgressEvaluationService:
         self.prompt_template_path = (
             Path(__file__).resolve().parent.parent / "prompts" / "evaluate_progress_prompt.txt"
         )
+        self.history_repository = HistoryRepository()
 
     def evaluate_progress(self, payload: EvaluateProgressRequest) -> EvaluateProgressResponse:
         if "simulate_error" in payload.goal.lower():
@@ -25,7 +27,7 @@ class ProgressEvaluationService:
         score = min(60 + (completed_count * 15) - (missed_count * 10), 100)
         score = max(score, 0)
 
-        return build_progress_response(
+        response = build_progress_response(
             score=score,
             feedback=self._build_feedback(payload, context, score),
             strengths=self._build_strengths(payload, context),
@@ -33,6 +35,8 @@ class ProgressEvaluationService:
             next_recommendations=self._build_next_recommendations(payload, context),
             prompt_used=prompt_used,
         )
+        self.history_repository.save_progress_evaluation(payload, response)
+        return response
 
     def _build_feedback(
         self,
@@ -117,4 +121,3 @@ class ProgressEvaluationService:
             missed_habits=", ".join(payload.missed_habits) or "ninguno",
             notes=payload.notes,
         )
-

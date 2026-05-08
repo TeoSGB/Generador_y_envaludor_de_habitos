@@ -3,6 +3,7 @@ from pathlib import Path
 from app.exceptions import SimulatedInternalError
 from app.models.plan import GeneratePlanRequest, GeneratePlanResponse
 from app.services.context_analysis_service import GoalContext, analyze_goal, get_level_guidance
+from app.services.history_repository import HistoryRepository
 from app.views.plan_view import build_plan_response
 
 
@@ -13,6 +14,7 @@ class HabitPlanService:
         self.prompt_template_path = (
             Path(__file__).resolve().parent.parent / "prompts" / "habit_plan_prompt.txt"
         )
+        self.history_repository = HistoryRepository()
 
     def generate_plan(self, payload: GeneratePlanRequest) -> GeneratePlanResponse:
         if "simulate_error" in payload.goal.lower():
@@ -22,12 +24,14 @@ class HabitPlanService:
         context = analyze_goal(payload.goal)
         level_guidance = get_level_guidance(payload.level)
 
-        return build_plan_response(
+        response = build_plan_response(
             habits=self._build_contextual_habits(payload, context, level_guidance),
             weekly_plan=self._build_weekly_plan(payload, context),
             recommendations=self._build_recommendations(payload, context, level_guidance),
             prompt_used=prompt_used,
         )
+        self.history_repository.save_habit_plan(payload, response)
+        return response
 
     def _build_contextual_habits(
         self,
@@ -105,4 +109,3 @@ class HabitPlanService:
             level=payload.level,
             available_time=payload.available_time,
         )
-

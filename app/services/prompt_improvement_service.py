@@ -2,6 +2,7 @@ from pathlib import Path
 
 from app.exceptions import SimulatedInternalError
 from app.models.prompt import ImprovePromptRequest, ImprovePromptResponse
+from app.services.history_repository import HistoryRepository
 from app.views.prompt_view import build_improve_prompt_response
 
 
@@ -12,6 +13,7 @@ class PromptImprovementService:
         self.prompt_template_path = (
             Path(__file__).resolve().parent.parent / "prompts" / "improve_prompt_template.txt"
         )
+        self.history_repository = HistoryRepository()
 
     def improve_prompt(self, payload: ImprovePromptRequest) -> ImprovePromptResponse:
         if "simulate_error" in payload.original_prompt.lower():
@@ -51,11 +53,13 @@ class PromptImprovementService:
         # Keep the internal template visible in the service for future LLM integration.
         _ = prompt_used
 
-        return build_improve_prompt_response(
+        response = build_improve_prompt_response(
             improved_prompt=improved_prompt,
             improvements_applied=improvements_applied,
             explanation=explanation,
         )
+        self.history_repository.save_prompt_improvement(payload, response)
+        return response
 
     def _build_prompt(self, payload: ImprovePromptRequest) -> str:
         template = self.prompt_template_path.read_text(encoding="utf-8")
