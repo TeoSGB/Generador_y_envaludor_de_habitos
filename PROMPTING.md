@@ -46,6 +46,10 @@ Categorías actuales:
 
 Cada categoría define acciones, métricas, hábitos de apoyo y hábitos de reflexión. Esto evita que todos los usuarios reciban el mismo plan aunque escriban objetivos diferentes.
 
+## Relación con la base de datos local
+
+Cuando se genera un plan, se evalúa progreso o se mejora un prompt, la API guarda el resultado en SQLite. Esto permite revisar ejemplos reales de prompts y respuestas generadas durante pruebas locales.
+
 ## Respuestas estructuradas en JSON
 
 Los prompts piden salidas con estructura clara, por ejemplo:

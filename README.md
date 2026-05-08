@@ -76,6 +76,9 @@ Documentación automática:
 | POST | `/evaluate-progress` | Evalúa progreso del usuario |
 | POST | `/improve-prompt` | Mejora un prompt básico |
 | GET | `/prompt-examples` | Lista ejemplos de prompts usados |
+| GET | `/history/plans` | Lista planes guardados en SQLite local |
+| GET | `/history/progress` | Lista evaluaciones guardadas en SQLite local |
+| GET | `/history/prompts` | Lista prompts mejorados guardados en SQLite local |
 
 ## Ejemplos curl
 
@@ -134,6 +137,32 @@ curl -X POST http://127.0.0.1:8000/improve-prompt \
 ```bash
 curl http://127.0.0.1:8000/prompt-examples
 ```
+
+### Ver historial local
+
+```bash
+curl http://127.0.0.1:8000/history/plans
+curl http://127.0.0.1:8000/history/progress
+curl http://127.0.0.1:8000/history/prompts
+```
+
+## Base de datos local simulada
+
+El proyecto usa SQLite como base de datos local simulada. No requiere instalar un servidor ni configurar credenciales.
+
+La base se crea automáticamente al iniciar la API en:
+
+```text
+app/data/habit_coach.db
+```
+
+Se guardan:
+
+- Planes generados desde `/generate-plan`.
+- Evaluaciones de progreso desde `/evaluate-progress`.
+- Prompts mejorados desde `/improve-prompt`.
+
+El archivo `.db` está ignorado por Git para evitar subir datos locales al repositorio.
 
 ## Estrategia de prompting
 
