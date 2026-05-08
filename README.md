@@ -1,13 +1,53 @@
 # Habit Coach API
 
-Habit Coach API es una API REST construida con Python y FastAPI para generar, evaluar y mejorar planes de hábitos personalizados usando principios de prompt engineering.
+## Descripción
 
-La aplicación no usa base de datos ni conexión real con APIs externas de IA. Las respuestas son simuladas, pero están organizadas como si en una siguiente fase se conectara un modelo de lenguaje.
+Habit Coach API es una API REST desarrollada con Python y FastAPI para generar, evaluar y mejorar planes de hábitos personalizados usando principios de prompt engineering.
 
-## Requisitos
+El proyecto trabaja con respuestas simuladas. No usa base de datos, interfaz gráfica, autenticación ni conexión real con servicios externos de inteligencia artificial.
 
-- Python 3.10 o superior
-- pip
+## Objetivo académico
+
+El objetivo del proyecto es demostrar buenas prácticas de desarrollo backend en una API sencilla, modular y evaluable. La aplicación evidencia uso de FastAPI, modelos Pydantic, validaciones, manejo de errores, pruebas automatizadas y prompts estructurados.
+
+## Tecnologías usadas
+
+- Python
+- FastAPI
+- Pydantic
+- Uvicorn
+- Pytest
+- HTTPX
+
+## Estructura del proyecto
+
+```text
+app/
+  controllers/
+  models/
+  prompts/
+  routes/
+  services/
+  views/
+  errors.py
+  exceptions.py
+  main.py
+tests/
+  test_main.py
+COMMITS.md
+PROMPTING.md
+README.md
+requirements.txt
+```
+
+La arquitectura sigue una versión simple de MVC adaptada a una API REST:
+
+- `models/`: contratos de entrada y salida usando Pydantic.
+- `views/`: funciones para construir respuestas.
+- `controllers/`: coordinación entre rutas y servicios.
+- `services/`: lógica de negocio y simulación de respuestas.
+- `routes/`: endpoints HTTP.
+- `prompts/`: plantillas de prompts reutilizables.
 
 ## Instalación
 
@@ -15,7 +55,7 @@ La aplicación no usa base de datos ni conexión real con APIs externas de IA. L
 pip install -r requirements.txt
 ```
 
-## Ejecutar el servidor
+## Ejecución
 
 ```bash
 uvicorn app.main:app --reload
@@ -26,25 +66,18 @@ Documentación automática:
 - Swagger UI: http://127.0.0.1:8000/docs
 - ReDoc: http://127.0.0.1:8000/redoc
 
-## Ejecutar pruebas
+## Endpoints disponibles
 
-```bash
-pytest
-```
+| Método | Endpoint | Descripción |
+| --- | --- | --- |
+| GET | `/` | Información general de la API |
+| GET | `/health` | Verifica que la API esté activa |
+| POST | `/generate-plan` | Genera un plan semanal de hábitos |
+| POST | `/evaluate-progress` | Evalúa progreso del usuario |
+| POST | `/improve-prompt` | Mejora un prompt básico |
+| GET | `/prompt-examples` | Lista ejemplos de prompts usados |
 
-## Arquitectura
-
-El proyecto usa una versión simple de MVC adaptada a una API REST:
-
-- `models/`: modelos Pydantic para validar entradas y estructurar respuestas.
-- `views/`: funciones que construyen las respuestas de la API.
-- `controllers/`: coordinan las peticiones entre rutas, servicios y vistas.
-- `services/`: contienen la lógica de negocio y generación de prompts.
-- `routes/`: exponen los endpoints de FastAPI.
-- `prompts/`: guarda plantillas reutilizables para prompting.
-- `tests/`: contiene pruebas básicas con pytest.
-
-## Endpoints
+## Ejemplos curl
 
 ### Información general
 
@@ -70,11 +103,7 @@ curl -X POST http://127.0.0.1:8000/generate-plan \
   }'
 ```
 
-Valores válidos para `level`:
-
-- `principiante`
-- `intermedio`
-- `avanzado`
+Valores válidos para `level`: `principiante`, `intermedio`, `avanzado`.
 
 ### Evaluar progreso
 
@@ -106,46 +135,59 @@ curl -X POST http://127.0.0.1:8000/improve-prompt \
 curl http://127.0.0.1:8000/prompt-examples
 ```
 
-## Validaciones y errores
+## Estrategia de prompting
 
-La API usa Pydantic para validar datos antes de ejecutar la lógica de negocio:
+La API usa prompts dinámicos construidos desde plantillas guardadas en `app/prompts/`. Cada prompt combina rol, contexto del usuario, instrucciones específicas, formato esperado y restricciones.
 
-- `goal`, `available_time`, `objective` y otros textos no pueden estar vacíos.
-- `level` solo acepta `principiante`, `intermedio` o `avanzado`.
-- `original_prompt` debe tener mínimo 10 caracteres.
-- `completed_habits` debe ser una lista con al menos un elemento.
-- Las listas de hábitos no deben contener textos vacíos.
+- Roles: se define quién debe actuar, por ejemplo un coach de hábitos responsable.
+- Contexto: se agregan datos como objetivo, nivel, tiempo disponible, hábitos completados y notas.
+- Formato JSON: se solicita una salida estructurada para que la respuesta sea fácil de consumir.
+- Mejora iterativa: `/improve-prompt` convierte un prompt básico en uno más claro, específico y útil.
 
-Las respuestas de error tienen una estructura clara:
+Más detalle en `PROMPTING.md`.
 
-```json
-{
-  "error": "Validation error",
-  "message": "Please review the request data and try again.",
-  "details": []
-}
+## Ejemplos de prompts usados
+
+La aplicación incluye plantillas para:
+
+- Generar planes de hábitos: `app/prompts/habit_plan_prompt.txt`
+- Evaluar progreso: `app/prompts/evaluate_progress_prompt.txt`
+- Mejorar prompts: `app/prompts/improve_prompt_template.txt`
+
+También pueden consultarse desde:
+
+```bash
+curl http://127.0.0.1:8000/prompt-examples
 ```
-
-Para simular errores internos durante pruebas manuales se puede enviar `simulate_error` dentro de algunos campos de texto.
-
-## Prompting Strategy
-
-La aplicación usa prompts como plantillas separadas dentro de `app/prompts/`. Cada endpoint construye un prompt dinámico con los datos recibidos y luego simula una respuesta coherente.
-
-- Roles: los prompts indican un rol claro, por ejemplo coach de hábitos o asistente especializado en evaluación de progreso.
-- Contexto del usuario: se agregan datos como objetivo, nivel, tiempo disponible, hábitos completados, hábitos pendientes y notas personales.
-- Formato JSON: los prompts piden una estructura de salida concreta para facilitar respuestas consistentes y fáciles de consumir por una API.
-- Mejora iterativa: `/improve-prompt` transforma un prompt básico en uno más específico al agregar rol, contexto, instrucciones, formato esperado y restricciones.
 
 ## Estrategia de commits
 
-La idea del proyecto es mantener commits pequeños, descriptivos y fáciles de revisar.
+El proyecto busca commits pequeños, descriptivos y agrupados por intención: estructura inicial, endpoints, modelos, servicios, prompts, validaciones, pruebas y documentación.
 
-Secuencia sugerida para esta tercera fase:
+Más detalle en `COMMITS.md`.
 
-1. `feat: add root api information endpoint`
-2. `refactor: improve request validations`
-3. `feat: add error handling responses`
-4. `test: add pytest coverage for api endpoints`
-5. `docs: update readme with testing instructions`
+## Cómo correr pruebas
+
+```bash
+pytest
+```
+
+Resultado esperado:
+
+```text
+6 passed
+```
+
+## Posibles mejoras futuras
+
+- Conectar con una API real de IA.
+- Agregar base de datos.
+- Guardar historial de planes.
+- Agregar autenticación.
+- Agregar métricas de progreso.
+- Desplegar la API en Render, Railway o Fly.io.
+
+## Conclusión
+
+Habit Coach API queda preparada como una entrega universitaria clara y funcional. El proyecto demuestra organización modular, endpoints REST, validaciones, manejo de errores, pruebas básicas y uso consciente de prompting sin añadir complejidad innecesaria.
 
