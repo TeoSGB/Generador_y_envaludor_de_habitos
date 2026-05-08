@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.exceptions import SimulatedInternalError
 from app.models.progress import EvaluateProgressRequest, EvaluateProgressResponse
 from app.views.progress_view import build_progress_response
 
@@ -13,6 +14,9 @@ class ProgressEvaluationService:
         )
 
     def evaluate_progress(self, payload: EvaluateProgressRequest) -> EvaluateProgressResponse:
+        if "simulate_error" in payload.goal.lower():
+            raise SimulatedInternalError("Unable to evaluate progress right now.")
+
         prompt_used = self._build_prompt(payload)
         completed_count = len(payload.completed_habits)
         missed_count = len(payload.missed_habits)

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.exceptions import SimulatedInternalError
 from app.models.prompt import ImprovePromptRequest, ImprovePromptResponse
 from app.views.prompt_view import build_improve_prompt_response
 
@@ -13,6 +14,9 @@ class PromptImprovementService:
         )
 
     def improve_prompt(self, payload: ImprovePromptRequest) -> ImprovePromptResponse:
+        if "simulate_error" in payload.original_prompt.lower():
+            raise SimulatedInternalError("Unable to improve the prompt right now.")
+
         prompt_used = self._build_prompt(payload)
         improved_prompt = (
             "Actúa como un coach de hábitos especializado en crear planes claros, realistas y medibles.\n\n"
@@ -59,4 +63,3 @@ class PromptImprovementService:
             original_prompt=payload.original_prompt,
             objective=payload.objective,
         )
-

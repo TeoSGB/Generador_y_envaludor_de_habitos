@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.exceptions import SimulatedInternalError
 from app.models.plan import GeneratePlanRequest, GeneratePlanResponse
 from app.views.plan_view import build_plan_response
 
@@ -13,6 +14,9 @@ class HabitPlanService:
         )
 
     def generate_plan(self, payload: GeneratePlanRequest) -> GeneratePlanResponse:
+        if "simulate_error" in payload.goal.lower():
+            raise SimulatedInternalError("Unable to generate the habit plan right now.")
+
         prompt_used = self._build_prompt(payload)
 
         # This is a deterministic simulation of an AI response.
