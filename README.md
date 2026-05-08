@@ -60,3 +60,12 @@ curl -X POST http://127.0.0.1:8000/generate-plan \
 3. `feat: add habit plan generation endpoint`
 4. `docs: add api usage instructions`
 
+## Arquitectura
+
+El proyecto usa una versión simple de MVC adaptada a una API REST:
+
+- `models/`: modelos Pydantic para validar entradas y estructurar respuestas.
+- `views/`: funciones que construyen las respuestas de la API.
+- `controllers/`: coordinan las peticiones entre rutas, servicios y vistas.
+- `services/`: contienen la lógica de negocio y generación de prompts.
+- `routes/`: exponen los endpoints de FastAPI.

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from app.models.plan import GeneratePlanRequest, GeneratePlanResponse
+from app.views.plan_view import build_plan_response
 
 
 class HabitPlanService:
@@ -38,12 +39,7 @@ class HabitPlanService:
             "Evalúa el progreso por constancia, no por perfección.",
         ]
 
-        return GeneratePlanResponse(
-            habits=habits,
-            weekly_plan=weekly_plan,
-            recommendations=recommendations,
-            prompt_used=prompt_used,
-        )
+        return build_plan_response(habits, weekly_plan, recommendations, prompt_used)
 
     def _build_prompt(self, payload: GeneratePlanRequest) -> str:
         template = self.prompt_template_path.read_text(encoding="utf-8")
@@ -52,4 +48,3 @@ class HabitPlanService:
             level=payload.level,
             available_time=payload.available_time,
         )
-

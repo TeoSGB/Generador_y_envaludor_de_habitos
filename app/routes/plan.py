@@ -1,15 +1,14 @@
 from fastapi import APIRouter
 
+from app.controllers.plan_controller import PlanController
 from app.models.plan import GeneratePlanRequest, GeneratePlanResponse
-from app.services.habit_plan_service import HabitPlanService
 
 
 router = APIRouter(tags=["Habit Plans"])
-habit_plan_service = HabitPlanService()
+plan_controller = PlanController()
 
 
 @router.post("/generate-plan", response_model=GeneratePlanResponse)
 def generate_plan(payload: GeneratePlanRequest) -> GeneratePlanResponse:
-    """Generate a simulated habit plan from a structured prompt."""
-    return habit_plan_service.generate_plan(payload)
-
+    """Route layer: receives the request and delegates to the controller."""
+    return plan_controller.generate_plan(payload)
