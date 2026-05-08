@@ -29,6 +29,23 @@ La API agrega datos enviados por el usuario al prompt:
 
 Con ese contexto, la respuesta simulada puede ser más personalizada y coherente.
 
+## Personalización contextual simulada
+
+Además del prompt, los servicios aplican reglas simples para detectar el tipo de objetivo. La detección se basa en palabras clave y permite adaptar las respuestas sin conectar una API externa de IA.
+
+Categorías actuales:
+
+- Actividad física.
+- Alimentación.
+- Estudio o aprendizaje.
+- Sueño y descanso.
+- Productividad.
+- Bienestar.
+- Lectura.
+- Finanzas personales.
+
+Cada categoría define acciones, métricas, hábitos de apoyo y hábitos de reflexión. Esto evita que todos los usuarios reciban el mismo plan aunque escriban objetivos diferentes.
+
 ## Respuestas estructuradas en JSON
 
 Los prompts piden salidas con estructura clara, por ejemplo:
@@ -90,4 +107,3 @@ Formato de salida esperado en JSON:
 ## Justificación
 
 El prompt mejorado es mejor porque reduce ambigüedad. Define quién responde, qué información debe considerar, cómo debe organizar la salida y qué restricciones debe respetar. Esto mejora la calidad de la respuesta y facilita su uso dentro de una API REST.
-

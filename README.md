@@ -143,6 +143,19 @@ La API usa prompts dinámicos construidos desde plantillas guardadas en `app/pro
 - Contexto: se agregan datos como objetivo, nivel, tiempo disponible, hábitos completados y notas.
 - Formato JSON: se solicita una salida estructurada para que la respuesta sea fácil de consumir.
 - Mejora iterativa: `/improve-prompt` convierte un prompt básico en uno más claro, específico y útil.
+- Respuestas contextuales: los servicios detectan el tipo de objetivo y adaptan hábitos, plan semanal, feedback y recomendaciones.
+
+## Personalización contextual
+
+La API mantiene respuestas simuladas, pero ahora analiza el objetivo del usuario para ajustar el contenido. Puede reconocer contextos como actividad física, alimentación, estudio, sueño, productividad, bienestar, lectura y finanzas personales.
+
+Ejemplos:
+
+- Si el objetivo es `quiero aprender ingles`, la respuesta prioriza estudio, sesiones cortas y registro de aprendizaje.
+- Si el objetivo es `quiero dormir mejor`, la respuesta prioriza rutina nocturna, descanso y seguimiento del sueño.
+- Si el objetivo es `quiero ahorrar dinero`, la evaluación de progreso usa lenguaje relacionado con gastos y presupuesto.
+
+Si no se detecta una categoría clara, la API usa una respuesta genérica pero sigue incorporando el objetivo, nivel y tiempo disponible del usuario.
 
 Más detalle en `PROMPTING.md`.
 
@@ -190,4 +203,3 @@ Resultado esperado:
 ## Conclusión
 
 Habit Coach API queda preparada como una entrega universitaria clara y funcional. El proyecto demuestra organización modular, endpoints REST, validaciones, manejo de errores, pruebas básicas y uso consciente de prompting sin añadir complejidad innecesaria.
-
