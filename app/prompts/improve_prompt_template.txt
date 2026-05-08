@@ -1,0 +1,20 @@
+Convierte el siguiente prompt básico en un prompt claro, específico y útil.
+
+Prompt original:
+{original_prompt}
+
+Objetivo:
+{objective}
+
+Aplica estas buenas prácticas:
+1. Define un rol claro para el asistente.
+2. Agrega contexto suficiente para orientar la respuesta.
+3. Incluye instrucciones concretas y verificables.
+4. Pide un formato de salida estructurado.
+5. Agrega restricciones para evitar respuestas vagas o poco útiles.
+
+Devuelve:
+- Prompt mejorado.
+- Lista de mejoras aplicadas.
+- Explicación breve de por qué el nuevo prompt es mejor.
+
