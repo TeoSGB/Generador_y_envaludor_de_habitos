@@ -1,6 +1,8 @@
 # Habit Coach API
 
-API REST construida con Python y FastAPI para generar planes de hábitos personalizados usando prompts estructurados.
+Habit Coach API es una API REST construida con Python y FastAPI para generar, evaluar y mejorar planes de hábitos personalizados usando principios de prompt engineering.
+
+La aplicación no usa base de datos ni conexión real con APIs externas de IA. Las respuestas son simuladas, pero están organizadas como si en una siguiente fase se conectara un modelo de lenguaje.
 
 ## Requisitos
 
@@ -19,10 +21,16 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-La documentación automática estará disponible en:
+Documentación automática:
 
 - Swagger UI: http://127.0.0.1:8000/docs
 - ReDoc: http://127.0.0.1:8000/redoc
+
+## Ejecutar pruebas
+
+```bash
+pytest
+```
 
 ## Arquitectura
 
@@ -34,22 +42,20 @@ El proyecto usa una versión simple de MVC adaptada a una API REST:
 - `services/`: contienen la lógica de negocio y generación de prompts.
 - `routes/`: exponen los endpoints de FastAPI.
 - `prompts/`: guarda plantillas reutilizables para prompting.
+- `tests/`: contiene pruebas básicas con pytest.
 
 ## Endpoints
+
+### Información general
+
+```bash
+curl http://127.0.0.1:8000/
+```
 
 ### Health check
 
 ```bash
 curl http://127.0.0.1:8000/health
-```
-
-Respuesta esperada:
-
-```json
-{
-  "status": "ok",
-  "message": "Habit Coach API running"
-}
 ```
 
 ### Generar plan de hábitos
@@ -63,6 +69,12 @@ curl -X POST http://127.0.0.1:8000/generate-plan \
     "available_time": "20 minutos diarios"
   }'
 ```
+
+Valores válidos para `level`:
+
+- `principiante`
+- `intermedio`
+- `avanzado`
 
 ### Evaluar progreso
 
@@ -94,20 +106,46 @@ curl -X POST http://127.0.0.1:8000/improve-prompt \
 curl http://127.0.0.1:8000/prompt-examples
 ```
 
+## Validaciones y errores
+
+La API usa Pydantic para validar datos antes de ejecutar la lógica de negocio:
+
+- `goal`, `available_time`, `objective` y otros textos no pueden estar vacíos.
+- `level` solo acepta `principiante`, `intermedio` o `avanzado`.
+- `original_prompt` debe tener mínimo 10 caracteres.
+- `completed_habits` debe ser una lista con al menos un elemento.
+- Las listas de hábitos no deben contener textos vacíos.
+
+Las respuestas de error tienen una estructura clara:
+
+```json
+{
+  "error": "Validation error",
+  "message": "Please review the request data and try again.",
+  "details": []
+}
+```
+
+Para simular errores internos durante pruebas manuales se puede enviar `simulate_error` dentro de algunos campos de texto.
+
 ## Prompting Strategy
 
-La aplicación usa prompts como plantillas separadas dentro de `app/prompts/`. Cada endpoint construye un prompt dinámico con los datos recibidos y luego simula una respuesta coherente, sin conectarse todavía a una API externa de IA.
+La aplicación usa prompts como plantillas separadas dentro de `app/prompts/`. Cada endpoint construye un prompt dinámico con los datos recibidos y luego simula una respuesta coherente.
 
 - Roles: los prompts indican un rol claro, por ejemplo coach de hábitos o asistente especializado en evaluación de progreso.
 - Contexto del usuario: se agregan datos como objetivo, nivel, tiempo disponible, hábitos completados, hábitos pendientes y notas personales.
 - Formato JSON: los prompts piden una estructura de salida concreta para facilitar respuestas consistentes y fáciles de consumir por una API.
 - Mejora iterativa: `/improve-prompt` transforma un prompt básico en uno más específico al agregar rol, contexto, instrucciones, formato esperado y restricciones.
 
-## Sugerencias de commits para la segunda fase
+## Estrategia de commits
 
-1. `feat: add progress evaluation models`
-2. `feat: add progress evaluation endpoint`
-3. `feat: add prompt improvement service`
-4. `feat: add prompt examples endpoint`
-5. `docs: update readme with prompting strategy`
+La idea del proyecto es mantener commits pequeños, descriptivos y fáciles de revisar.
+
+Secuencia sugerida para esta tercera fase:
+
+1. `feat: add root api information endpoint`
+2. `refactor: improve request validations`
+3. `feat: add error handling responses`
+4. `test: add pytest coverage for api endpoints`
+5. `docs: update readme with testing instructions`
 
