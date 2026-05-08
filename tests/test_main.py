@@ -66,6 +66,23 @@ def test_generate_plan_adapts_to_study_goal() -> None:
     assert "quiero aprender ingles" in data["prompt_used"]
 
 
+def test_habit_plan_history_saves_generated_plan() -> None:
+    client.post(
+        "/generate-plan",
+        json={
+            "goal": "quiero leer mas libros",
+            "level": "principiante",
+            "available_time": "10 minutos diarios",
+        },
+    )
+
+    response = client.get("/history/plans")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data["items"]) > 0
+    assert "goal" in data["items"][0]
+
+
 def test_generate_plan_adapts_to_sleep_goal() -> None:
     response = client.post(
         "/generate-plan",
@@ -146,6 +163,24 @@ def test_evaluate_progress_uses_actual_habits_and_notes() -> None:
     assert "horario fijo" in " ".join(data["areas_to_improve"])
 
 
+def test_progress_history_saves_evaluation() -> None:
+    client.post(
+        "/evaluate-progress",
+        json={
+            "goal": "quiero ahorrar dinero",
+            "completed_habits": ["registrar gastos"],
+            "missed_habits": ["revisar presupuesto"],
+            "notes": "me falto tiempo",
+        },
+    )
+
+    response = client.get("/history/progress")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data["items"]) > 0
+    assert "score" in data["items"][0]
+
+
 def test_improve_prompt_with_valid_data() -> None:
     response = client.post(
         "/improve-prompt",
@@ -159,6 +194,22 @@ def test_improve_prompt_with_valid_data() -> None:
     assert response.status_code == 200
     assert "JSON" in data["improved_prompt"]
     assert len(data["improvements_applied"]) >= 5
+
+
+def test_prompt_history_saves_improvement() -> None:
+    client.post(
+        "/improve-prompt",
+        json={
+            "original_prompt": "Actua como coach y dame habitos",
+            "objective": "obtener una respuesta mas estructurada y en formato JSON",
+        },
+    )
+
+    response = client.get("/history/prompts")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data["items"]) > 0
+    assert "improved_prompt" in data["items"][0]
 
 
 def test_generate_plan_with_invalid_level() -> None:
@@ -175,4 +226,3 @@ def test_generate_plan_with_invalid_level() -> None:
     assert response.status_code == 422
     assert data["error"] == "Validation error"
     assert data["details"][0]["field"] == "level"
-
